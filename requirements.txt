@@ -1,0 +1,7 @@
+environs==10.3.0
+python-dotenv==1.0.1
+pydantic==2.10.4
+flask==3.1.0
+flask-restful==0.3.10
+psycopg2-binary==2.9.10
+pypika==0.48.9

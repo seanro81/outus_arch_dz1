@@ -1,0 +1,4 @@
+https://aaronluna.dev/series/flask-api-tutorial/part-3/
+https://github.com/a-luna/flask-api-tutorial/tree/v0.3
+https://pypika.readthedocs.io/en/latest/
+

@@ -1,0 +1,21 @@
+version: "3.9"
+services:
+ app:
+   build:
+     context: .
+     dockerfile: dockerfile
+   volumes:
+     - ./adapters:/adapters
+     - ./tests:/tests
+   ports:
+     - "5000:5000"
+   depends_on:
+     - postgres
+ postgres:
+    image: postgres:13.3
+    environment:
+      POSTGRES_DB: "postgres"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "pgpwd4habr"
+    ports:
+      - "5432:5432"
