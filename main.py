@@ -3,12 +3,13 @@ import secrets
 
 import datetime
 import json
+import bcrypt
 from flask import Flask, request, jsonify
 from pydantic import ValidationError
 
 from adapters.orm import users_tbl_crete, authinfo_tbl_crete, SimpleORM
 from models.user import UserInfo, User, AuthInfo, Login
-from utils.settings import logger
+from utils.settings import logger, hash_bcr
 
 app = Flask(__name__)
 app.debug = True
@@ -30,7 +31,9 @@ def login():
                 "request_id": login.id,
                 "code": 404
             }, 404
-        if auth.password == login.password:
+        hashed_pwd = hash_bcr(login.password)
+
+        if auth.password == str(hashed_pwd):
             logger.info(f"/login: Пользователь {login.id} Успешно Аутентифицирован")
             return {"token": auth.token}
         else:
@@ -100,8 +103,10 @@ def register():
         t_s = datetime.datetime.now(tz=datetime.timezone.utc)
         event_date = str(t_s.isoformat(sep=' ', timespec='milliseconds'))
 
+        hashed_pwd = hash_bcr(user.password)
+
         auth = AuthInfo(id=user.id,
-                        password=user.password,
+                        password=str(hashed_pwd),
                         token=token,
                         token_create_dt=event_date,
                         token_valid_dt=event_date
@@ -128,22 +133,9 @@ def register():
 
 
 if __name__ == "__main__":
-
-    logger.info("Запуск скрипта миграции: Создание таблиц users и authinfo, если они не созданы и добавление тестового пользователя 6d082945-4db0-41cd-945f-da21e78f7da5 для коллекции запросов, если таблицы пустые ")
+    logger.info(
+        "Запуск скрипта миграции: Создание таблиц users и authinfo, если они не созданы и добавление тестового пользователя 6d082945-4db0-41cd-945f-da21e78f7da5 для коллекции запросов, если таблицы пустые ")
     orm = SimpleORM()
     orm.migration()
-
-    """
-      Осталось сделать 
-      1) миграция - создание таблиц при запуске if not exist  +++
-      2) тестовых пользователей добавить для коллекции        +++
-      3) логирование добавить к методам                       +++
-      4) Описание md файл (взять с Кафки)                     +++
-      6) dockerfile
-      7) dockercompose
-      8) добавить в репозиторий
-      9) добавить заполненную коллекцию запросов
-      10) подумать на кастомизацией ошибки 503               нет 
-    """
 
     app.run(host="0.0.0.0", port=5000, debug=True)
